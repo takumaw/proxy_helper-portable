@@ -1,0 +1,113 @@
+.\"
+.\" Copyright (c) 2018-2026 Takuma WATANABE.  All rights reserved.
+.\"
+.Dd June 28, 2026
+.Dt proxy_helper 8
+.Os Linux
+.Sh NAME
+.Nm proxy_helper
+.Nd helper for constructing proxy environment variables from system settings
+.Sh SYNOPSIS
+.Nm
+.Op Fl c | Fl s | Fl f | Fl w
+.Op Fl p | Fl -pac Ar path_or_url
+.Op Fl u | Fl -url Ar url
+.Sh DESCRIPTION
+The
+.Nm
+utility reads the proxy settings from Linux system settings (GNOME, KDE)
+or local configuration files, and configures the
+.Ev http_proxy ,
+.Ev https_proxy ,
+.Ev ftp_proxy
+and
+.Ev no_proxy
+environment variables.
+.Pp
+.Bl -tag -width Ds
+.It Fl c | Fl -csh
+Generate C-shell commands on stdout.  This is the default if
+.Ev SHELL
+ends with "csh".
+.It Fl s | Fl -sh
+Generate Bourne shell commands on stdout.  This is the default if
+.Ev SHELL
+does not match csh, fish, or powershell.
+.It Fl f | Fl -fish
+Generate Fish shell commands on stdout.  This is the default if
+.Ev SHELL
+ends with "fish".
+.It Fl w | Fl -powershell
+Generate PowerShell commands on stdout.  This is the default if
+.Ev SHELL
+ends with "pwsh" or "powershell".
+.It Fl p | Fl -pac Ar path_or_url
+Enable Proxy Auto-Configuration (PAC) script evaluation using a custom PAC file
+path or URL. If omitted, proxy_helper automatically retrieves the active PAC
+URL from system configurations.
+.It Fl u | Fl -url Ar url
+The target URL used for PAC script evaluation (default: "www.google.com").
+.El
+.Pp
+The
+.Ev no_proxy
+variable is generated based on the rules below:
+.Pp
+.Bl -bullet -offset indent -compact
+.It
+If a host matches the pattern \fI*.some.domain.name\fP, then \fIsome.domain.name\fP is added.
+.It
+If a host matches a valid IPv4 address, then the host is added as is.
+.It
+If a host matches a valid IPv6 address, then the host is added after removing square brackets (e.g., \fIfe80::1\fP).
+.It
+If a host matches a valid CIDR subnet notation (IPv4 or IPv6), then the host is added as is (e.g., \fI192.168.1.0/24\fP or \fIfe80::/64\fP).
+.It
+Ignored otherwise.
+.El
+.Pp
+The proxy settings are resolved in the following priority order:
+  1. Environment variable override: PROXY_HELPER_PAC_URL
+  2. User configuration file: ~/.config/proxy_helper/config.toml
+  3. System-wide configuration file: /etc/proxy_helper/config.toml
+  4. GNOME desktop proxy settings (via gsettings)
+  5. KDE desktop proxy settings (via kioslaverc)
+.Sh USAGE
+The
+.Nm 
+utility should not be invoked directly.
+It is intended only for use by the shell profile.
+.Pp
+In your
+.I /etc/profile
+for Bash, or
+.I /etc/zprofile
+for Zsh, add the following code snippet:
+.Pp
+.Bd -literal -offset indent
+if [ -x /usr/local/libexec/proxy_helper ]; then
+    eval `/usr/local/libexec/proxy_helper -s`
+fi
+.Ed
+.Pp
+In your
+.I ~/.config/fish/config.fish
+for Fish, add the following code snippet:
+.Pp
+.Bd -literal -offset indent
+if test -x /usr/local/libexec/proxy_helper
+    eval (/usr/local/libexec/proxy_helper -f)
+end
+.Ed
+.Pp
+In your profile script for PowerShell, add the following code snippet:
+.Pp
+.Bd -literal -offset indent
+if (Test-Path /usr/local/libexec/proxy_helper) {
+    /usr/local/libexec/proxy_helper -w | Invoke-Expression
+}
+.Ed
+.Sh AUTHOR
+Takuma WATANABE
+.Sh SEE ALSO
+.Xr path_helper 8

@@ -1,0 +1,12 @@
+# Rust / Cargo
+# Compiled files and executables
+/target
+/debug
+**/*.rs.bk
+*.pdb
+**/mutants.out*/
+rustc-ice-*.txt
+
+# Scratch / Local testing / Distribution
+/scratch
+/dist

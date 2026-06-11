@@ -1,0 +1,16 @@
+[package]
+name = "proxy_helper_ng"
+version = "0.1.0"
+edition = "2021"
+description = "Helper for constructing proxy environment variables from Linux system settings, config files, or PAC files"
+repository = "https://github.com/takumaw/proxy_helper_ng"
+license = "MIT"
+
+[dependencies]
+rquickjs = "0.11.0"
+ureq = { version = "2.10.1" }
+clap = { version = "4.5.4", features = ["derive"] }
+url = "2.5.0"
+regex = "1.10.4"
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8"
